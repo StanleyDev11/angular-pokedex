@@ -25,11 +25,12 @@
         <p><strong>Type :</strong> {{ pokemon.types }}</p>
         <p><strong>Date :</strong> {{ pokemon.created | date: "dd/MM/yyyy" }}</p>
         <p><strong>PV :</strong> {{ pokemon.life }}</p>
+        <p><strong>Dégâts :</strong> {{ pokemon.damage }}</p>
 
-        <div class="btn-group">
+        <!--<div class="btn-group">
           <button (click)="increLife(pokemon)" [disabled]="pokemon.life >= 30">+</button>
           <button (click)="decreLife(pokemon)" [disabled]="pokemon.life <= 10">-</button>
-        </div>
+        </div>-->
 
         <button class="btn-link" [routerLink]="['/pokemons', pokemon.id]">Voir</button>
       </div>

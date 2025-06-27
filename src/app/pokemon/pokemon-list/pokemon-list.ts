@@ -24,6 +24,7 @@ export class PokemonList {
 
     return pokemonList.filter(pokemon => pokemon.name.toLowerCase().includes(searchTerm.trim().toLowerCase()))
   })
+  form: any;
 
   bonjour() { 
     console.log('Hello !');
@@ -42,6 +43,22 @@ export class PokemonList {
     if (pokemon.life > 15) return 'Moyen';
     return 'Petit';
   }
+
+  increaseStat(stat: 'life' | 'damage') {
+  const control = this.form.get(stat);
+  if (control) {
+    control.setValue((control.value || 0) + 1);
+  }
+}
+
+decreaseStat(stat: 'life' | 'damage') {
+  const control = this.form.get(stat);
+  if (control) {
+    control.setValue(Math.max(0, (control.value || 0) - 1));
+  }
+}
+
+
 
 
 }

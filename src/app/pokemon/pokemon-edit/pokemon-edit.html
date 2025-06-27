@@ -1,9 +1,7 @@
 <div class="container mt-5">More actions
   <div class="card">
     <div class="row g-0">
-      <div
-        class="col-md-4 d-flex align-items-center justify-content-center bg-light"
-      >
+      <div class="col-md-4 d-flex align-items-center justify-content-center bg-light">
         <img
           [src]="pokemon().picture"
           class="img-fluid rounded-start"
@@ -16,101 +14,139 @@
             <h2 class="card-title">{{ pokemon().name }}</h2>
             <table class="table">
               <tbody>
+                <!-- NAME -->
                 <tr>
                   <th scope="row">Name</th>
                   <td>
                     <input
-                    formControlName="name"
+                      formControlName="name"
                       type="text"
                       class="form-control"
-                      [value]="pokemon().name"
                       placeholder="Nom du Pokémon"
+                      [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
                     />
+                    @if (form.get('name')?.hasError('required')) {
+                      <div class="invalid-feedback">Veuillez renseigner ce champ.</div>
+                    }
+                    @if (form.get('name')?.hasError('minlength')) {
+                      <div class="invalid-feedback">
+                        Minimum {{ form.get('name')?.getError('minlength')?.requiredLength }} caractères requis.
+                      </div>
+                    }
+                    @if (form.get('name')?.hasError('maxlength')) {
+                      <div class="invalid-feedback">Ce nom est trop long.</div>
+                    }
                   </td>
                 </tr>
+
+                <!-- LIFE -->
                 <tr>
                   <th scope="row">Points de vie</th>
                   <td>
                     <div class="input-group">
-                      <button class="btn btn-outline-secondary" disabled>
-                        -
-                      </button>
+                      <button class="btn btn-outline-secondary" disabled >-</button>
                       <input
-                      formControlName="life"
+                        formControlName="life"
                         type="number"
                         class="form-control text-center"
-                        [value]="pokemon().life"
+                        placeholder="Points de vie"
+                        [class.is-invalid]="form.get('life')?.invalid && form.get('life')?.touched"
                       />
-                      <button class="btn btn-outline-secondary" disabled>
-                        +
-                      </button>
+                      <button class="btn btn-outline-secondary" disabled>+</button>
                     </div>
+                    @if (form.get('life')?.hasError('required')) {
+                      <div class="invalid-feedback">Veuillez entrer les points de vie.</div>
+                    }
+                    @if (form.get('life')?.hasError('min')) {
+                      <div class="invalid-feedback">Les points de vie doivent être positifs.</div>
+                    }
                   </td>
                 </tr>
+
+                <!-- DAMAGE -->
                 <tr>
                   <th scope="row">Dégâts</th>
                   <td>
                     <div class="input-group">
-                      <button class="btn btn-outline-secondary" disabled>
-                        -
-                      </button>
+                      <button class="btn btn-outline-secondary" disabled>-</button>
                       <input
-                      formControlName="damage"
+                        formControlName="damage"
                         type="number"
                         class="form-control text-center"
-                        [value]="pokemon().damage"
+                        placeholder="Dégâts"
+                        [class.is-invalid]="form.get('damage')?.invalid && form.get('damage')?.touched"
                       />
-                      <button class="btn btn-outline-secondary" disabled>
-                        +
-                      </button>
+                      <button class="btn btn-outline-secondary" disabled>+</button>
                     </div>
-                  </td>
-                </tr>
-                <tr>
-                  <th scope="row">Types</th>
-                  <td>
-        
-                    @for(type of pokemonTypeList.controls; track type ;let index =$index) 
-                    {
-
-
-
-                    <button
-                      type="button"
-                      class="btn btn-secondary btn-sm rounded-pill me-2"
-                      (click)="pokemonTypeList.removeAt(index)"
-                      [style.backgroundColor]="getPokemonColor(type.value)"
-                      [style.color]="type.value == 'Electrik' ? 'black' :'white'"
-                    >
-                      {{ type.value }} <span class="badge" [style.color]="type.value == 'Electrik' ? 'black' :'white'">x</span>
-                    </button>
+                    @if (form.get('damage')?.hasError('required')) {
+                      <div class="invalid-feedback">Veuillez entrer les dégâts.</div>
                     }
-                    <div class="row mt-3">
-                      @for(type of pokemonService.getPokemonTypeList(); track
-                      type) {
-                      <div class="col-md-4">
-                        <div class="form-check">
-                          <input
-                          #checkbox
-                           (change)="     
-                           onPokemonTypeChange(type, checkbox.checked)"
-                           [checked]="isPokemonTypeSelected(type)"
-                            class="form-check-input"
-                            type="checkbox"
-                            [value]="type"
-                            [id]="type"
-                          />
-                          <label class="form-check-label" [for]="type">
-                            {{ type }}
-                          </label>
-                        </div>
-                      </div>
-                      }
-                    </div>
+                    @if (form.get('damage')?.hasError('min')) {
+                      <div class="invalid-feedback">Les dégâts doivent être positifs.</div>
+                    }
                   </td>
                 </tr>
+
+                <!-- TYPES -->
+                <tr>
+  <th scope="row">Types</th>
+  <td>
+
+    <!-- Boutons des types sélectionnés -->
+    @for (type of pokemonTypeList.controls; track type; let index = $index) {
+      <button
+        type="button"
+        class="btn btn-secondary btn-sm rounded-pill me-2"
+        (click)="pokemonTypeList.removeAt(index)"
+        [style.backgroundColor]="getPokemonColor(type.value)"
+        [style.color]="type.value === 'Electrik' ? 'black' : 'white'"
+      >
+        {{ type.value }}
+        <span class="badge" [style.color]="type.value === 'Electrik' ? 'black' : 'white'">x</span>
+      </button>
+    }
+
+    <!-- ✅ Affichage des erreurs (hors des boutons !) -->
+    @if (pokemonTypeList.invalid && pokemonTypeList.touched) {
+      <div class="text-danger mt-2">
+        @if (pokemonTypeList.hasError('required')) {
+          <p>Veuillez sélectionner au moins un type pour un Pokémon.</p>
+        }
+        @if (pokemonTypeList.hasError('maxlength')) {
+          <p>Veuillez sélectionner au maximum 3 types pour un Pokémon.</p>
+        }
+      </div>
+    }
+
+    <!-- Liste des types disponibles à cocher -->
+    <div class="row mt-3">
+      @for (type of pokemonService.getPokemonTypeList(); track type) {
+        <div class="col-md-4">
+          <div class="form-check">
+            <input
+              #checkbox
+              (change)="onPokemonTypeChange(type, checkbox.checked)"
+              [checked]="isPokemonTypeSelected(type)"
+              class="form-check-input"
+              type="checkbox"
+              [value]="type"
+              [id]="type"
+            />
+            <label class="form-check-label" [for]="type">
+              {{ type }}
+            </label>
+          </div>
+        </div>
+      }
+    </div>
+
+  </td>
+</tr>
+
               </tbody>
             </table>
+
+            <!-- ACTIONS -->
             <div class="d-flex justify-content-between mt-4">
               <button
                 class="btn btn-link text-decoration-none text-warning"
@@ -118,7 +154,10 @@
               >
                 RETOUR
               </button>
-              <button class="btn btn-link text-decoration-none text-warning">
+              <button type="submit" class="btn btn-link text-decoration-none "
+              [class.text-secondary]="form.invalid"
+              [class.text-warning]="form.valid"
+              [disabled]="form.invalid">
                 SAUVEGARDER LES CHANGEMENTS
               </button>
             </div>
@@ -128,5 +167,3 @@
     </div>
   </div>
 </div>
-
-<!--<pre>{{form.value | json }}</pre> --> 

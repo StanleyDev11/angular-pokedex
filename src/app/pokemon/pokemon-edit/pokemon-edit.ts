@@ -1,9 +1,10 @@
-import { DatePipe, JsonPipe } from '@angular/common';
+import { DatePipe, JsonPipe,  } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PokemonService } from '../../pokemon.service';
-import { FormArray, FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { getPokemonColor } from '../../pokemon.model';
+import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { getPokemonColor, POKEMON_RULES } from '../../pokemon.model';
+
 
 @Component({
   selector: 'app-pokemon-edit',
@@ -11,11 +12,12 @@ import { getPokemonColor } from '../../pokemon.model';
   imports: [RouterLink, ReactiveFormsModule],
   templateUrl: './pokemon-edit.html',
   styles: ``,
-  //Utiliser le JsonPipe pour déboguer  un formulaire réactif(ajout dans l'import)
+
 
 })
 export class PokemonEdit {
-[x: string]: any;
+  [x: string]: any;
+
   // Injection des dépendances
   readonly route = inject(ActivatedRoute);
   readonly pokemonService = inject(PokemonService);
@@ -28,15 +30,30 @@ export class PokemonEdit {
     this.pokemonService.getPokemonById(this.pokemonId())
   ).asReadonly();
 
-  // Formulaire initialisé à partir du Pokémon
+  // Formulaire initialisé à partir du Pokémon avec validation selon POKEMON_RULES
   readonly form = new FormGroup({
-    name: new FormControl(this.pokemon().name),
-    life: new FormControl(this.pokemon().life),
-    damage: new FormControl(this.pokemon().damage),
+    name: new FormControl(this.pokemon().name, [
+      Validators.required,
+      Validators.minLength(POKEMON_RULES.MIN_NAME),
+      Validators.maxLength(POKEMON_RULES.MAX_NAME),
+      Validators.pattern(POKEMON_RULES.NAME_PATTERN),
+    ]),
+    life: new FormControl(this.pokemon().life, [
+      Validators.required,
+      Validators.min(POKEMON_RULES.MIN_LIFE),
+      Validators.max(POKEMON_RULES.MAX_LIFE),
+    ]),
+    damage: new FormControl(this.pokemon().damage, [
+      Validators.required,
+      Validators.min(POKEMON_RULES.MIN_DAMAGE),
+      Validators.max(POKEMON_RULES.MAX_DAMAGE),
+    ]),
     types: new FormArray(
       this.pokemon().types.map((type) => new FormControl(type))
     ),
   });
+
+
 
   // Raccourci pour accéder à l'array des types
   get pokemonTypeList(): FormArray {
@@ -66,11 +83,34 @@ export class PokemonEdit {
     }
   }
 
-getPokemonColor(type:string){
-  return getPokemonColor(type)
-}
-
-  onSubmit(){
-    console.log(this.form.value);
+  getPokemonColor(type: string) {
+    return getPokemonColor(type);
   }
+
+  onSubmit() {
+    // Vérification du nombre de types sélectionnés
+    if (
+      this.pokemonTypeList.length < POKEMON_RULES.MIN_TYPES ||
+      this.pokemonTypeList.length > POKEMON_RULES.MAX_TYPES
+    ) {
+      console.error(
+        `Le nombre de types doit être entre ${POKEMON_RULES.MIN_TYPES} et ${POKEMON_RULES.MAX_TYPES}.`
+      );
+      return;
+    }
+
+    // Vérifie que le formulaire est valide
+    if (this.form.invalid) {
+      console.error('Le formulaire est invalide, merci de corriger les erreurs.');
+      return;
+    }
+
+    // Si tout est ok, on peut envoyer les données
+    console.log('Formulaire validé : ', this.form.value);
+  }
+
+  get pokemonNanme():FormControl{
+    return this.form.get('name') as FormControl;
+  }
+  
 }

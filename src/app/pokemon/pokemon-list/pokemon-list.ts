@@ -1,0 +1,47 @@
+import { Component, computed, inject, signal } from '@angular/core';
+import { Pokemon } from '../../pokemon.model';
+import { PokemonService } from '../../pokemon.service';
+import { DatePipe } from '@angular/common';
+import { PokemonBorder } from '../../pokemon-border';
+import { RouterLink, RouterModule } from '@angular/router';
+
+@Component({
+  selector: 'app-pokemon-list',
+  imports: [PokemonBorder,DatePipe ,RouterModule],
+  templateUrl: './pokemon-list.html',
+  styles: ``
+})
+export class PokemonList {
+
+   readonly #pokemonService =inject(PokemonService);
+  readonly pokemonList = signal(this.#pokemonService.getPokemonList());
+  
+  readonly searchTerm= signal('');
+ 
+  readonly pokemonListFiltered= computed(() =>{
+    const searchTerm= this.searchTerm();
+    const pokemonList = this.pokemonList();
+
+    return pokemonList.filter(pokemon => pokemon.name.toLowerCase().includes(searchTerm.trim().toLowerCase()))
+  })
+
+  bonjour() { 
+    console.log('Hello !');
+  }
+
+  increLife(pokemon: Pokemon) {
+    pokemon.life = pokemon.life + 1;
+  }
+
+  decreLife(pokemon: Pokemon) {
+    pokemon.life = pokemon.life - 1;
+  }
+
+  size(pokemon: Pokemon) {
+    if (pokemon.life > 25) return 'Grand';
+    if (pokemon.life > 15) return 'Moyen';
+    return 'Petit';
+  }
+
+
+}

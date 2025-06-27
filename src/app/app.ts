@@ -1,11 +1,16 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { RouterModule, RouterOutlet } from '@angular/router';
+
+
+
 
 @Component({
   selector: 'app-root',
-  imports: [],
+  standalone: true,
+  imports: [RouterOutlet , RouterModule], 
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class App {
-  protected title = 'angular-pokedex-app';
+
 }

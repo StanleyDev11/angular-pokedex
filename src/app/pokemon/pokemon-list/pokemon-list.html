@@ -17,23 +17,29 @@
 
   <!-- Liste des Pokémons -->
   <div class="pokedex-grid">
-    @for (pokemon of pokemonListFiltered(); track pokemon.id) {
+  @for (pokemon of pokemonListFiltered(); track pokemon.id) {
+    <a [routerLink]="['/pokemons', pokemon.id]" class="text-decoration-none text-dark">
       <div class="pokemon-card" appPokemonBorder [pokemonType]="pokemon.types[0]">
         <img [src]="pokemon.picture" [alt]="pokemon.name" class="pokemon-image" />
         <p><strong>Nom :</strong> {{ pokemon.name }}</p>
         <p><strong>Taille :</strong> {{ size(pokemon) }}</p>
         <p><strong>Type :</strong> {{ pokemon.types }}</p>
-        <p><strong>Date :</strong> {{ pokemon.created | date: "dd/MM/yyyy" }}</p>
+        <p><strong>Date :</strong> {{ pokemon.created | date: 'dd/MM/yyyy' }}</p>
         <p><strong>PV :</strong> {{ pokemon.life }}</p>
         <p><strong>Dégâts :</strong> {{ pokemon.damage }}</p>
+      </div>
+    </a>
+  }
+</div>
+
 
         <!--<div class="btn-group">
           <button (click)="increLife(pokemon)" [disabled]="pokemon.life >= 30">+</button>
           <button (click)="decreLife(pokemon)" [disabled]="pokemon.life <= 10">-</button>
         </div>-->
 
-        <button class="btn-link" [routerLink]="['/pokemons', pokemon.id]">Voir</button>
-      </div>
-    }
-  </div>
-</div>
+       
+    
+
+  <!--<button class="btn-link" [routerLink]="['/pokemons', pokemon.id]">Voir</button>
+      </div> -->

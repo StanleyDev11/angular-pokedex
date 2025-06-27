@@ -4,17 +4,22 @@ import { PokemonService } from '../../pokemon.service';
 import { DatePipe } from '@angular/common';
 import { PokemonBorder } from '../../pokemon-border';
 import { RouterLink, RouterModule } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-pokemon-list',
+  standalone: true,
   imports: [PokemonBorder,DatePipe ,RouterModule],
   templateUrl: './pokemon-list.html',
   styles: ``
 })
 export class PokemonList {
+[x: string]: any;
 
    readonly #pokemonService =inject(PokemonService);
-  readonly pokemonList = signal(this.#pokemonService.getPokemonList());
+  readonly pokemonList = toSignal(this.#pokemonService.getPokemonList(),{
+    initialValue:[],
+  });
   
   readonly searchTerm= signal('');
  
@@ -37,6 +42,9 @@ export class PokemonList {
   decreLife(pokemon: Pokemon) {
     pokemon.life = pokemon.life - 1;
   }
+
+  readonly loading =computed(()=>
+    this.pokemonList().length==0);
 
   size(pokemon: Pokemon) {
     if (pokemon.life > 25) return 'Grand';

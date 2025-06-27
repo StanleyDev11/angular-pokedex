@@ -17,6 +17,13 @@
 
   <!-- Liste des Pokémons -->
   <div class="pokedex-grid">
+    @if (loading()) {
+      <div class="d-flex justify-content-center">More actions
+      <div class="spinner-border text-success" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+    }
   @for (pokemon of pokemonListFiltered(); track pokemon.id) {
     <a [routerLink]="['/pokemons', pokemon.id]" class="text-decoration-none text-dark">
       <div class="pokemon-card" appPokemonBorder [pokemonType]="pokemon.types[0]">

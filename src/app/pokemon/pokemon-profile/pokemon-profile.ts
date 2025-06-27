@@ -6,7 +6,8 @@ import { DatePipe } from '@angular/common';
 
 @Component({
   selector: 'app-pokemon-profile',
-  imports: [RouterModule,DatePipe],
+  standalone: true, // Important pour standalone components
+  imports: [RouterModule, DatePipe],
   templateUrl: './pokemon-profile.html',
   styles: ``
 })
@@ -16,20 +17,22 @@ export class PokemonProfile implements OnDestroy {
   readonly #pokemonService = inject(PokemonService);
 
   readonly pokemon = signal<any>(null);
-
   private subscription: Subscription;
 
   constructor() {
-    // On s'abonne aux changements des paramètres de la route
+    // Abonnement aux paramètres de la route
     this.subscription = this.#route.paramMap.subscribe((params: ParamMap) => {
       const id = Number(params.get('id'));
-      const found = this.#pokemonService.getPokemonById(id);
-      this.pokemon.set(found);
+      if (!isNaN(id)) {
+        this.#pokemonService.getPokemonById(id).subscribe({
+          next: (data) => this.pokemon.set(data),
+          error: (err) => console.error('Erreur de chargement du Pokémon :', err)
+        });
+      }
     });
   }
 
   ngOnDestroy() {
-    // On nettoie l'abonnement pour éviter les fuites mémoire
     this.subscription.unsubscribe();
   }
 }

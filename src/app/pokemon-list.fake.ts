@@ -10,6 +10,7 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/001.png',
     types: ['Plante', 'Poison'],
     created: new Date(),
+     update: new Date(),
   },
   {
     id: 2,
@@ -20,6 +21,7 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/004.png',
     types: ['Feu'],
     created: new Date(),
+    update: new Date(),
   },
   {
     id: 3,
@@ -30,6 +32,7 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/007.png',
     types: ['Eau'],
     created: new Date(),
+     update: new Date(),
   },
   {
     id: 4,
@@ -40,6 +43,7 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/013.png',
     types: ['Insecte', 'Poison'],
     created: new Date(),
+     update: new Date(),
   },
   {
     id: 5,
@@ -50,6 +54,7 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/016.png',
     types: ['Normal', 'Vol'],
     created: new Date(),
+     update: new Date(),
   },
   {
     id: 6,
@@ -60,6 +65,7 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/019.png',
     types: ['Normal'],
     created: new Date(),
+     update: new Date(),
   },
   {
     id: 7,
@@ -70,6 +76,7 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/021.png',
     types: ['Normal', 'Vol'],
     created: new Date(),
+     update: new Date(),
   },
   {
     id: 8,
@@ -80,6 +87,7 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/023.png',
     types: ['Poison'],
     created: new Date(),
+     update: new Date(),
   },
   {
     id: 9,
@@ -90,6 +98,7 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/025.png',
     types: ['Electrik'],
     created: new Date(),
+     update: new Date(),
   },
   {
     id: 10,
@@ -100,6 +109,7 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/027.png',
     types: ['Normal'],
     created: new Date(),
+     update: new Date(),
   },
   {
     id: 11,
@@ -110,6 +120,7 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/035.png',
     types: ['Fée'],
     created: new Date(),
+     update: new Date(),
   },
   {
     id: 12,
@@ -120,5 +131,6 @@ export const POKEMON_LIST: PokemonList = [
       'https://assets.pokemon.com/assets/cms2/img/pokedex/detail/037.png',
     types: ['Feu'],
     created: new Date(),
+     update: new Date(),
   },
 ];

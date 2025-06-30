@@ -6,6 +6,7 @@ export interface Pokemon {
   damage: number;
   types: [string, string?, string?];
   created: Date;
+  update: Date;
 }
 
 export type PokemonList = Pokemon[];
@@ -44,6 +45,9 @@ export function getPokemonColor(type:string): string {
       default:
         return '#303030';
     }
+
+
+    
 
 
     

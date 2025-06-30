@@ -1,0 +1,177 @@
+<div class="container mt-5">
+  <div class="card">
+    <div class="row g-0">
+      <div class="col-md-4 d-flex align-items-center justify-content-center bg-light">
+        <!-- Champ pour l'image à ajouter -->
+        <input
+          formControlName="picture"
+          type="text"
+          class="form-control m-3"
+          placeholder="URL de l'image du Pokémon"
+        />
+        <img
+          [src]="form.get('picture')?.value"
+          class="img-fluid rounded-start"
+          [alt]="form.get('name')?.value"
+          *ngIf="form.get('picture')?.value"
+        />
+      </div>
+      <div class="col-md-8">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="card-body">
+            <h2 class="card-title">Ajouter un nouveau Pokémon</h2>
+            <table class="table">
+              <tbody>
+                <!-- NAME -->
+                <tr>
+                  <th scope="row">Nom</th>
+                  <td>
+                    <input
+                      formControlName="name"
+                      type="text"
+                      class="form-control"
+                      placeholder="Nom du Pokémon"
+                      [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
+                    />
+                    <div *ngIf="form.get('name')?.touched && form.get('name')?.invalid" class="invalid-feedback">
+                      <div *ngIf="form.get('name')?.errors?.['required']">
+                        Veuillez renseigner ce champ.
+                      </div>
+                      <div *ngIf="form.get('name')?.errors?.['minlength']">
+                        Minimum {{ form.get('name')?.errors?.['minlength']?.requiredLength }} caractères requis.
+                      </div>
+                      <div *ngIf="form.get('name')?.errors?.['maxlength']">
+                        Ce nom est trop long.
+                      </div>
+                      <div *ngIf="form.get('name')?.errors?.['pattern']">
+                        Format du nom invalide.
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- LIFE -->
+                <tr>
+                  <th scope="row">Points de vie</th>
+                  <td>
+                    <div class="input-group">
+                      <input
+                        formControlName="life"
+                        type="number"
+                        class="form-control text-center"
+                        placeholder="Points de vie"
+                        [class.is-invalid]="form.get('life')?.invalid && form.get('life')?.touched"
+                      />
+                    </div>
+                    <div *ngIf="form.get('life')?.touched && form.get('life')?.invalid" class="invalid-feedback">
+                      <div *ngIf="form.get('life')?.errors?.['required']">
+                        Veuillez entrer les points de vie.
+                      </div>
+                      <div *ngIf="form.get('life')?.errors?.['min']">
+                        Les points de vie doivent être positifs.
+                      </div>
+                      <div *ngIf="form.get('life')?.errors?.['max']">
+                        Valeur trop élevée pour les points de vie.
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- DAMAGE -->
+                <tr>
+                  <th scope="row">Dégâts</th>
+                  <td>
+                    <div class="input-group">
+                      <input
+                        formControlName="damage"
+                        type="number"
+                        class="form-control text-center"
+                        placeholder="Dégâts"
+                        [class.is-invalid]="form.get('damage')?.invalid && form.get('damage')?.touched"
+                      />
+                    </div>
+                    <div *ngIf="form.get('damage')?.touched && form.get('damage')?.invalid" class="invalid-feedback">
+                      <div *ngIf="form.get('damage')?.errors?.['required']">
+                        Veuillez entrer les dégâts.
+                      </div>
+                      <div *ngIf="form.get('damage')?.errors?.['min']">
+                        Les dégâts doivent être positifs.
+                      </div>
+                      <div *ngIf="form.get('damage')?.errors?.['max']">
+                        Valeur trop élevée pour les dégâts.
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- TYPES -->
+                <tr>
+                  <th scope="row">Types</th>
+                  <td>
+                    <!-- Boutons des types sélectionnés -->
+                    <ng-container *ngFor="let typeCtrl of pokemonTypeList.controls; let i = index">
+                      <button
+                        type="button"
+                        class="btn btn-secondary btn-sm rounded-pill me-2"
+                        (click)="pokemonTypeList.removeAt(i)"
+                        [style.backgroundColor]="getPokemonColor(typeCtrl.value)"
+                        [style.color]="typeCtrl.value === 'Electrik' ? 'black' : 'white'"
+                      >
+                        {{ typeCtrl.value }}
+                        <span class="badge" [style.color]="typeCtrl.value === 'Electrik' ? 'black' : 'white'">x</span>
+                      </button>
+                    </ng-container>
+
+                    <!-- Erreurs -->
+                    <div *ngIf="pokemonTypeList.invalid && pokemonTypeList.touched" class="text-danger mt-2">
+                      <div *ngIf="pokemonTypeList.errors?.['required']">
+                        Veuillez sélectionner au moins un type pour un Pokémon.
+                      </div>
+                      <div *ngIf="pokemonTypeList.errors?.['maxlength']">
+                        Veuillez sélectionner au maximum 3 types pour un Pokémon.
+                      </div>
+                    </div>
+
+                    <!-- Liste des types disponibles -->
+                    <div class="row mt-3">
+                      <div class="col-md-4" *ngFor="let type of pokemonService.getPokemonTypeList()">
+                        <div class="form-check">
+                          <input
+                            #checkbox
+                            (change)="onPokemonTypeChange(type, checkbox.checked)"
+                            [checked]="isPokemonTypeSelected(type)"
+                            class="form-check-input"
+                            type="checkbox"
+                            [value]="type"
+                            [id]="type"
+                          />
+                          <label class="form-check-label" [for]="type">{{ type }}</label>
+                        </div>
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <!-- ACTIONS -->
+            <div class="d-flex justify-content-between mt-4">
+              <button class="btn btn-link text-decoration-none text-secondary" routerLink="/pokemons">
+                ANNULER
+              </button>
+              <button
+                type="submit"
+                class="btn btn-link text-decoration-none"
+                [class.text-secondary]="form.invalid"
+                [class.text-success]="form.valid"
+                [disabled]="form.invalid"
+              >
+                AJOUTER LE POKÉMON
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

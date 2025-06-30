@@ -15,6 +15,8 @@
       (input)="searchTerm.set(searchField.value)" />
   </div>
 
+  
+
   <!-- Liste des Pokémons -->
   <div class="pokedex-grid">
     @if (loading()) {
@@ -32,12 +34,23 @@
         <p><strong>Taille :</strong> {{ size(pokemon) }}</p>
         <p><strong>Type :</strong> {{ pokemon.types }}</p>
         <p><strong>Date :</strong> {{ pokemon.created | date: 'dd/MM/yyyy' }}</p>
+        <p><strong>Update :</strong> {{ pokemon.update | date: 'dd/MM/yyyy' }}</p>
         <p><strong>PV :</strong> {{ pokemon.life }}</p>
         <p><strong>Dégâts :</strong> {{ pokemon.damage }}</p>
+        
       </div>
     </a>
   }
+
+<div class=position- fixed bottom-0 end-0 m-3>
+<button type="button"
+class="btn btn-success rounded-circle btn-lg"
+routerLink="/pokemons/add">
++
+</button>
 </div>
+
+
 
 
         <!--<div class="btn-group">

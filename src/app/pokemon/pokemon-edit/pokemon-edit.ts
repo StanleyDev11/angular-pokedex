@@ -12,6 +12,8 @@ import { NgFor, NgIf } from '@angular/common';
   templateUrl: './pokemon-edit.html',
 })
 export class PokemonEdit {
+  #router: any;
+  [x: string]: any;
   readonly route = inject(ActivatedRoute);
   readonly pokemonService = inject(PokemonService);
 
@@ -89,27 +91,52 @@ export class PokemonEdit {
   getPokemonColor(type: string) {
     return getPokemonColor(type);
   }
+onDelete() {
+  if (!confirm('Voulez-vous vraiment supprimer ce Pokémon ?')) return;
 
-  onSubmit() {
-    if (
-      this.pokemonTypeList.length < POKEMON_RULES.MIN_TYPES ||
-      this.pokemonTypeList.length > POKEMON_RULES.MAX_TYPES
-    ) {
-      console.error(
-        `Le nombre de types doit être entre ${POKEMON_RULES.MIN_TYPES} et ${POKEMON_RULES.MAX_TYPES}.`
-      );
-      return;
-    }
+  this.pokemonService.deletePokemon(this.pokemonId()).subscribe({
+    next: () => {
+      console.log('Pokémon supprimé');
+      
+    },
+    error: (err) => console.error('Erreur suppression', err),
+  });
+}
 
-    if (this.form.invalid) {
-      console.error('Le formulaire est invalide, merci de corriger les erreurs.');
-      return;
-    }
-
-    console.log('Formulaire validé : ', this.form.value);
+ onSubmit() {
+  if (
+    this.pokemonTypeList.length < POKEMON_RULES.MIN_TYPES ||
+    this.pokemonTypeList.length > POKEMON_RULES.MAX_TYPES
+  ) {
+    console.error(
+      `Le nombre de types doit être entre ${POKEMON_RULES.MIN_TYPES} et ${POKEMON_RULES.MAX_TYPES}.`
+    );
+    return;
   }
 
-  get pokemonName(): FormControl {
-    return this.form.get('name') as FormControl;
+  if (this.form.invalid) {
+    console.error('Le formulaire est invalide, merci de corriger les erreurs.');
+    return;
   }
+
+ 
+  const updatedPokemon: Pokemon = {
+    ...this.pokemon()!, 
+    ...this.form.value  
+  };
+
+  this.pokemonService.updatePokemon(updatedPokemon).subscribe({
+    next: () => {
+      console.log('Pokémon mis à jour avec succès !');
+      // Redirection vers la liste ou le détail du Pokémon
+      window.alert('Modification réussie !');
+      this.#router.navigateByUrl('/pokemons');
+      
+    },
+    error: err => {
+      console.error("Erreur lors de la mise à jour :", err);
+    }
+  });
+}
+
 }

@@ -35,6 +35,15 @@ export class PokemonService {
   }
 
   /**
+ * Supprime un Pokémon via l'API à partir de son ID
+ */
+deletePokemon(id: number): Observable<void> {
+  const url = `${this.POKEMON_API}${id}`;
+  return this.http.delete<void>(url);
+}
+
+
+  /**
    * Retourne une liste statique des types de Pokémons
    */
   getPokemonTypeList(): string[] {

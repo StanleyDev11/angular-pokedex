@@ -1,28 +1,41 @@
 <div class="container mt-5">
   <div class="card">
-    <div class="row g-0">
-      <div class="col-md-4 d-flex align-items-center justify-content-center bg-light">
-        <!-- Champ pour l'image à ajouter -->
-        <input
-          formControlName="picture"
-          type="text"
-          class="form-control m-3"
-          placeholder="URL de l'image du Pokémon"
-        />
-        <img
-          [src]="form.get('picture')?.value"
-          class="img-fluid rounded-start"
-          [alt]="form.get('name')?.value"
-          *ngIf="form.get('picture')?.value"
-        />
-      </div>
-      <div class="col-md-8">
-        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="row g-0">
+        <!-- Colonne image -->
+        <div class="col-md-4 d-flex flex-column align-items-center justify-content-center bg-light p-3">
+          <!-- Champ URL image -->
+          <input
+            formControlName="picture"
+            type="text"
+            class="form-control mb-3"
+            placeholder="URL de l'image du Pokémon"
+            [class.is-invalid]="form.get('picture')?.invalid && form.get('picture')?.touched"
+          />
+
+          <!-- Image affichée si URL valide -->
+          <img
+            *ngIf="form.get('picture')?.valid"
+            [src]="form.get('picture')?.value"
+            class="img-fluid rounded shadow-sm"
+            [alt]="form.get('name')?.value || 'Image Pokémon'"
+            style="max-height: 250px;"
+          />
+
+          <!-- Erreurs image -->
+          <div *ngIf="form.get('picture')?.touched && form.get('picture')?.invalid" class="invalid-feedback d-block">
+            <div *ngIf="form.get('picture')?.errors?.['required']">Veuillez fournir une URL d’image.</div>
+            <div *ngIf="form.get('picture')?.errors?.['pattern']">Format d’URL invalide.</div>
+          </div>
+        </div>
+
+        <!-- Colonne formulaire -->
+        <div class="col-md-8">
           <div class="card-body">
             <h2 class="card-title">Ajouter un nouveau Pokémon</h2>
             <table class="table">
               <tbody>
-                <!-- NAME -->
+                <!-- Nom -->
                 <tr>
                   <th scope="row">Nom</th>
                   <td>
@@ -34,105 +47,75 @@
                       [class.is-invalid]="form.get('name')?.invalid && form.get('name')?.touched"
                     />
                     <div *ngIf="form.get('name')?.touched && form.get('name')?.invalid" class="invalid-feedback">
-                      <div *ngIf="form.get('name')?.errors?.['required']">
-                        Veuillez renseigner ce champ.
-                      </div>
+                      <div *ngIf="form.get('name')?.errors?.['required']">Veuillez renseigner ce champ.</div>
                       <div *ngIf="form.get('name')?.errors?.['minlength']">
                         Minimum {{ form.get('name')?.errors?.['minlength']?.requiredLength }} caractères requis.
                       </div>
-                      <div *ngIf="form.get('name')?.errors?.['maxlength']">
-                        Ce nom est trop long.
-                      </div>
-                      <div *ngIf="form.get('name')?.errors?.['pattern']">
-                        Format du nom invalide.
-                      </div>
+                      <div *ngIf="form.get('name')?.errors?.['maxlength']">Ce nom est trop long.</div>
+                      <div *ngIf="form.get('name')?.errors?.['pattern']">Format du nom invalide.</div>
                     </div>
                   </td>
                 </tr>
 
-                <!-- LIFE -->
+                <!-- Vie -->
                 <tr>
                   <th scope="row">Points de vie</th>
                   <td>
-                    <div class="input-group">
-                      <input
-                        formControlName="life"
-                        type="number"
-                        class="form-control text-center"
-                        placeholder="Points de vie"
-                        [class.is-invalid]="form.get('life')?.invalid && form.get('life')?.touched"
-                      />
-                    </div>
+                    <input
+                      formControlName="life"
+                      type="number"
+                      class="form-control text-center"
+                      placeholder="Points de vie"
+                      [class.is-invalid]="form.get('life')?.invalid && form.get('life')?.touched"
+                    />
                     <div *ngIf="form.get('life')?.touched && form.get('life')?.invalid" class="invalid-feedback">
-                      <div *ngIf="form.get('life')?.errors?.['required']">
-                        Veuillez entrer les points de vie.
-                      </div>
-                      <div *ngIf="form.get('life')?.errors?.['min']">
-                        Les points de vie doivent être positifs.
-                      </div>
-                      <div *ngIf="form.get('life')?.errors?.['max']">
-                        Valeur trop élevée pour les points de vie.
-                      </div>
+                      <div *ngIf="form.get('life')?.errors?.['required']">Veuillez entrer les points de vie.</div>
+                      <div *ngIf="form.get('life')?.errors?.['min']">Les points de vie doivent être positifs.</div>
+                      <div *ngIf="form.get('life')?.errors?.['max']">Valeur trop élevée pour les points de vie.</div>
                     </div>
                   </td>
                 </tr>
 
-                <!-- DAMAGE -->
+                <!-- Dégâts -->
                 <tr>
                   <th scope="row">Dégâts</th>
                   <td>
-                    <div class="input-group">
-                      <input
-                        formControlName="damage"
-                        type="number"
-                        class="form-control text-center"
-                        placeholder="Dégâts"
-                        [class.is-invalid]="form.get('damage')?.invalid && form.get('damage')?.touched"
-                      />
-                    </div>
+                    <input
+                      formControlName="damage"
+                      type="number"
+                      class="form-control text-center"
+                      placeholder="Dégâts"
+                      [class.is-invalid]="form.get('damage')?.invalid && form.get('damage')?.touched"
+                    />
                     <div *ngIf="form.get('damage')?.touched && form.get('damage')?.invalid" class="invalid-feedback">
-                      <div *ngIf="form.get('damage')?.errors?.['required']">
-                        Veuillez entrer les dégâts.
-                      </div>
-                      <div *ngIf="form.get('damage')?.errors?.['min']">
-                        Les dégâts doivent être positifs.
-                      </div>
-                      <div *ngIf="form.get('damage')?.errors?.['max']">
-                        Valeur trop élevée pour les dégâts.
-                      </div>
+                      <div *ngIf="form.get('damage')?.errors?.['required']">Veuillez entrer les dégâts.</div>
+                      <div *ngIf="form.get('damage')?.errors?.['min']">Les dégâts doivent être positifs.</div>
+                      <div *ngIf="form.get('damage')?.errors?.['max']">Valeur trop élevée pour les dégâts.</div>
                     </div>
                   </td>
                 </tr>
 
-                <!-- TYPES -->
+                <!-- Types -->
                 <tr>
                   <th scope="row">Types</th>
                   <td>
-                    <!-- Boutons des types sélectionnés -->
                     <ng-container *ngFor="let typeCtrl of pokemonTypeList.controls; let i = index">
                       <button
                         type="button"
-                        class="btn btn-secondary btn-sm rounded-pill me-2"
+                        class="btn btn-secondary btn-sm rounded-pill me-2 mb-1"
                         (click)="pokemonTypeList.removeAt(i)"
                         [style.backgroundColor]="getPokemonColor(typeCtrl.value)"
                         [style.color]="typeCtrl.value === 'Electrik' ? 'black' : 'white'"
                       >
-                        {{ typeCtrl.value }}
-                        <span class="badge" [style.color]="typeCtrl.value === 'Electrik' ? 'black' : 'white'">x</span>
+                        {{ typeCtrl.value }} <span class="badge ms-1">x</span>
                       </button>
                     </ng-container>
 
-                    <!-- Erreurs -->
                     <div *ngIf="pokemonTypeList.invalid && pokemonTypeList.touched" class="text-danger mt-2">
-                      <div *ngIf="pokemonTypeList.errors?.['required']">
-                        Veuillez sélectionner au moins un type pour un Pokémon.
-                      </div>
-                      <div *ngIf="pokemonTypeList.errors?.['maxlength']">
-                        Veuillez sélectionner au maximum 3 types pour un Pokémon.
-                      </div>
+                      <div *ngIf="pokemonTypeList.errors?.['required']">Veuillez sélectionner au moins un type.</div>
+                      <div *ngIf="pokemonTypeList.errors?.['maxlength']">Maximum 3 types autorisés.</div>
                     </div>
 
-                    <!-- Liste des types disponibles -->
                     <div class="row mt-3">
                       <div class="col-md-4" *ngFor="let type of pokemonService.getPokemonTypeList()">
                         <div class="form-check">
@@ -154,24 +137,23 @@
               </tbody>
             </table>
 
-            <!-- ACTIONS -->
+            <!-- Boutons d'action -->
             <div class="d-flex justify-content-between mt-4">
-              <button class="btn btn-link text-decoration-none text-secondary" routerLink="/pokemons">
+              <button class="btn btn-link text-secondary text-decoration-none" routerLink="/pokemons">
                 ANNULER
               </button>
+
               <button
                 type="submit"
-                class="btn btn-link text-decoration-none"
-                [class.text-secondary]="form.invalid"
-                [class.text-success]="form.valid"
+                class="btn btn-success"
                 [disabled]="form.invalid"
               >
                 AJOUTER LE POKÉMON
               </button>
             </div>
           </div>
-        </form>
+        </div>
       </div>
-    </div>
+    </form>
   </div>
 </div>

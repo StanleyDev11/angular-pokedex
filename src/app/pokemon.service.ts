@@ -1,5 +1,15 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collectionData, collection, doc, docData, addDoc, updateDoc, deleteDoc, Timestamp } from '@angular/fire/firestore';
+import {
+  Firestore,
+  collection,
+  collectionData,
+  doc,
+  docData,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  Timestamp
+} from '@angular/fire/firestore';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { Pokemon } from './pokemon.model';
@@ -8,18 +18,15 @@ import { Pokemon } from './pokemon.model';
   providedIn: 'root'
 })
 export class PokemonService {
-  [x: string]: any;
 
   private pokemonCollection;
 
   constructor(private firestore: Firestore) {
-    // Retirer le type générique ici
     this.pokemonCollection = collection(this.firestore, 'pokemons');
   }
 
   getPokemonList(): Observable<Pokemon[]> {
     return collectionData(this.pokemonCollection, { idField: 'id' }).pipe(
-      // On caste explicitement en Pokemon[]
       map((pokemons) => (pokemons as Pokemon[]).map(p => this.convertTimestampToDate(p))),
       catchError(error => {
         console.error('Erreur getPokemonList:', error);
@@ -29,7 +36,6 @@ export class PokemonService {
   }
 
   getPokemonById(id: string): Observable<Pokemon | undefined> {
-    // Retirer le type générique ici
     const pokemonDoc = doc(this.firestore, `pokemons/${id}`);
     return docData(pokemonDoc, { idField: 'id' }).pipe(
       map(pokemon => pokemon ? this.convertTimestampToDate(pokemon as Pokemon) : undefined),
@@ -53,7 +59,6 @@ export class PokemonService {
     if (!pokemon.id) {
       return Promise.reject(new Error('Pokémon ID manquant pour mise à jour'));
     }
-    // Retirer le type générique ici
     const pokemonDoc = doc(this.firestore, `pokemons/${pokemon.id}`);
     return updateDoc(pokemonDoc, { ...pokemon })
       .then(() => console.log('Pokémon mis à jour'))
@@ -64,7 +69,6 @@ export class PokemonService {
   }
 
   deletePokemon(id: string): Promise<void> {
-    // Retirer le type générique ici
     const pokemonDoc = doc(this.firestore, `pokemons/${id}`);
     return deleteDoc(pokemonDoc)
       .then(() => console.log('Pokémon supprimé'))
@@ -72,6 +76,35 @@ export class PokemonService {
         console.error('Erreur deletePokemon:', error);
         throw new Error('Erreur lors de la suppression du pokémon.');
       });
+  }
+
+  getPokemonTypeList(): string[] {
+    return [
+      'Plante',
+      'Feu',
+      'Eau',
+      'Insecte',
+      'Normal',
+      'Electrick',
+      'Poison',
+      'Fée',
+      'Vol',
+    ];
+  }
+
+  getColor(type: string): string {
+    switch (type.toLowerCase()) {
+      case 'plante': return 'green';
+      case 'feu': return 'red';
+      case 'eau': return 'blue';
+      case 'insecte': return 'limegreen';
+      case 'normal': return 'gray';
+      case 'electrick': return 'gold';
+      case 'poison': return 'purple';
+      case 'fée': return 'pink';
+      case 'vol': return 'skyblue';
+      default: return 'lightgray';
+    }
   }
 
   private convertTimestampToDate(pokemon: any): Pokemon {

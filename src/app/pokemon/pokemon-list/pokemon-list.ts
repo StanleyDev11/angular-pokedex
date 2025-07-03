@@ -3,70 +3,57 @@ import { Pokemon } from '../../pokemon.model';
 import { PokemonService } from '../../pokemon.service';
 import { DatePipe } from '@angular/common';
 import { PokemonBorder } from '../../pokemon-border';
-import { RouterLink, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-pokemon-list',
   standalone: true,
-  imports: [PokemonBorder,DatePipe ,RouterModule],
+  imports: [PokemonBorder, DatePipe, RouterModule],
   templateUrl: './pokemon-list.html',
   styles: ``
 })
 export class PokemonList {
-[x: string]: any;
+  readonly #pokemonService = inject(PokemonService);
 
-   readonly #pokemonService =inject(PokemonService);
-  readonly pokemonList = toSignal(this.#pokemonService.getPokemonList(),{
-    initialValue:[],
+  // Convertir l'Observable de Firestore en signal Angular
+  readonly pokemonList = toSignal(this.#pokemonService.getPokemonList(), {
+    initialValue: [],
   });
-  
-  readonly searchTerm= signal('');
- 
-  readonly pokemonListFiltered= computed(() =>{
-    const searchTerm= this.searchTerm();
-    const pokemonList = this.pokemonList();
 
-    return pokemonList.filter(pokemon => pokemon.name.toLowerCase().includes(searchTerm.trim().toLowerCase()))
-  })
-  form: any;
+  readonly searchTerm = signal('');
 
-  bonjour() { 
-    console.log('Hello !');
-  }
+  // Computed pour filtrer la liste selon le terme de recherche
+  readonly pokemonListFiltered = computed(() => {
+    const search = this.searchTerm().trim().toLowerCase();
+    const pokemons = this.pokemonList();
+    return pokemons.filter(pokemon =>
+      pokemon.name.toLowerCase().includes(search)
+    );
+  });
 
+  // Pour indiquer un chargement (ex: afficher spinner si vide)
+  readonly loading = computed(() => this.pokemonList().length === 0);
+
+  // Exemple simple de fonctions d'update locale (modifier l'objet pokemon)
   increLife(pokemon: Pokemon) {
-    pokemon.life = pokemon.life + 1;
+    pokemon.life = (pokemon.life ?? 0) + 1;
   }
 
   decreLife(pokemon: Pokemon) {
-    pokemon.life = pokemon.life - 1;
+    pokemon.life = (pokemon.life ?? 0) - 1;
   }
 
-  readonly loading =computed(()=>
-    this.pokemonList().length==0);
-
-  size(pokemon: Pokemon) {
+  size(pokemon: Pokemon): string {
     if (pokemon.life > 25) return 'Grand';
     if (pokemon.life > 15) return 'Moyen';
     return 'Petit';
   }
 
-  increaseStat(stat: 'life' | 'damage') {
-  const control = this.form.get(stat);
-  if (control) {
-    control.setValue((control.value || 0) + 1);
+  // Suppression du code lié à "form" qui n'est pas défini ici.
+  // Tu peux l'ajouter plus tard avec ReactiveForms si besoin.
+
+  bonjour() {
+    console.log('Hello !');
   }
-}
-
-decreaseStat(stat: 'life' | 'damage') {
-  const control = this.form.get(stat);
-  if (control) {
-    control.setValue(Math.max(0, (control.value || 0) - 1));
-  }
-}
-
-
-
-
 }

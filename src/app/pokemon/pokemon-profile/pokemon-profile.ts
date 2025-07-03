@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { ActivatedRoute, ParamMap, Router, RouterModule } from '@angular/router';
 import { PokemonService } from '../../pokemon.service';
-import { Subscription } from 'rxjs';
+import { Subscription, switchMap, of } from 'rxjs';
 import { DatePipe } from '@angular/common';
 
 @Component({
@@ -20,14 +20,18 @@ export class PokemonProfile implements OnDestroy {
   private subscription: Subscription;
 
   constructor() {
-    this.subscription = this.#route.paramMap.subscribe((params: ParamMap) => {
-      const id = Number(params.get('id'));
-      if (!isNaN(id)) {
-        this.#pokemonService.getPokemonById(id).subscribe({
-          next: (data) => this.pokemon.set(data),
-          error: (err) => console.error('Erreur de chargement du Pokémon :', err)
-        });
-      }
+    this.subscription = this.#route.paramMap.pipe(
+      switchMap((params: ParamMap) => {
+        const id = params.get('id');
+        if (id) {
+          // Récupération Firestore via service, retourne un Observable
+          return this.#pokemonService.getPokemonById(id);
+        }
+        return of(null);
+      })
+    ).subscribe({
+      next: (data) => this.pokemon.set(data),
+      error: (err) => console.error('Erreur de chargement du Pokémon :', err)
     });
   }
 
@@ -37,13 +41,14 @@ export class PokemonProfile implements OnDestroy {
     const poke = this.pokemon();
     if (!poke?.id) return;
 
-    this.#pokemonService.deletePokemon(poke.id).subscribe({
-      next: () => {
+    this.#pokemonService.deletePokemon(poke.id)
+      .then(() => {
         console.log('Pokémon supprimé');
         this.#router.navigateByUrl('/pokemons');
-      },
-      error: (err) => console.error('Erreur suppression', err),
-    });
+      })
+      .catch((err: any) => {
+        console.error('Erreur suppression', err);
+      });
   }
 
   ngOnDestroy() {

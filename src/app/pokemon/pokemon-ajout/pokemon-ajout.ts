@@ -48,16 +48,13 @@ export class PokemonAddComponent {
     });
   }
 
-  
   get pokemonTypeList(): FormArray {
     return this.form.get('types') as FormArray;
   }
 
-  
   isPokemonTypeSelected(type: string): boolean {
     return this.pokemonTypeList.value.includes(type);
   }
-
 
   onPokemonTypeChange(type: string, isChecked: boolean) {
     if (isChecked) {
@@ -72,17 +69,21 @@ export class PokemonAddComponent {
     }
   }
 
-  // Obtenir la couleur d’un type de Pokémon
   getPokemonColor(type: string): string {
-    return this.pokemonService.getColor(type);
+    return this.pokemonService['getColor'](type);
   }
 
-  // Soumettre le formulaire
+  // Remplacer l’abonnement par gestion de Promise
   onSubmit() {
     if (this.form.valid) {
-      this.pokemonService.addPokemon(this.form.value).subscribe(() => {
-        this.router.navigate(['/pokemons']);
-      });
+      this.pokemonService.addPokemon(this.form.value)
+        .then(() => {
+          this.router.navigate(['/pokemons']);
+        })
+        .catch(error => {
+          console.error('Erreur lors de l’ajout du pokémon', error);
+          // Afficher un message d’erreur à l’utilisateur éventuellement
+        });
     }
   }
 }

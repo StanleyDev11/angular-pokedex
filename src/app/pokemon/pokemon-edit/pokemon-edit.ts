@@ -1,38 +1,35 @@
 import { Component, inject, signal, effect } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PokemonService } from '../../pokemon.service';
 import { FormArray, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { getPokemonColor, POKEMON_RULES, Pokemon } from '../../pokemon.model';
 import { NgFor, NgIf } from '@angular/common';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-pokemon-edit',
   standalone: true,
-  imports: [RouterLink, ReactiveFormsModule,NgIf,NgFor],
+  imports: [RouterLink, ReactiveFormsModule, NgIf, NgFor],
   templateUrl: './pokemon-edit.html',
 })
 export class PokemonEdit {
-  #router: any;
-  [x: string]: any;
   readonly route = inject(ActivatedRoute);
+  readonly router = inject(Router);
   readonly pokemonService = inject(PokemonService);
 
-  readonly pokemonId = signal(Number(this.route.snapshot.paramMap.get('id') ?? 0));
+  // Firestore IDs sont des strings, on récupère l'id en string
+  readonly pokemonId = signal(this.route.snapshot.paramMap.get('id') ?? '');
 
-  // Signal qui contiendra le Pokémon (null au départ)
-  readonly pokemon = signal<Pokemon | null>(null);
+  // Convert Observable Firestore en signal (évite subscription manuelle)
+  readonly pokemon = toSignal(
+    this.pokemonService.getPokemonById(this.pokemonId()),
+    { initialValue: null }
+  );
 
-  // FormGroup initialisé plus tard
   form!: FormGroup;
 
   constructor() {
-    // On récupère le Pokémon via l'Observable et on met à jour le signal pokemon
-    this.pokemonService.getPokemonById(this.pokemonId()).subscribe({
-      next: (poke) => this.pokemon.set(poke),
-      error: (err) => console.error('Erreur chargement pokemon', err),
-    });
-
-    // Effet déclenché à chaque fois que le signal pokemon change
+    // Dès que le signal pokemon change, on initialise ou met à jour le formulaire
     effect(() => {
       const poke = this.pokemon();
       if (poke) {
@@ -68,9 +65,7 @@ export class PokemonEdit {
   }
 
   isPokemonTypeSelected(type: string): boolean {
-    return this.pokemonTypeList.controls.some(
-      control => control.value === type
-    );
+    return this.pokemonTypeList.controls.some(control => control.value === type);
   }
 
   onPokemonTypeChange(type: string, isChecked: boolean) {
@@ -79,9 +74,7 @@ export class PokemonEdit {
         this.pokemonTypeList.push(new FormControl(type));
       }
     } else {
-      const index = this.pokemonTypeList.controls.findIndex(
-        control => control.value === type
-      );
+      const index = this.pokemonTypeList.controls.findIndex(control => control.value === type);
       if (index !== -1) {
         this.pokemonTypeList.removeAt(index);
       }
@@ -91,52 +84,47 @@ export class PokemonEdit {
   getPokemonColor(type: string) {
     return getPokemonColor(type);
   }
-onDelete() {
-  if (!confirm('Voulez-vous vraiment supprimer ce Pokémon ?')) return;
 
-  this.pokemonService.deletePokemon(this.pokemonId()).subscribe({
-    next: () => {
-      console.log('Pokémon supprimé');
-      
-    },
-    error: (err) => console.error('Erreur suppression', err),
-  });
-}
+  onDelete() {
+    if (!confirm('Voulez-vous vraiment supprimer ce Pokémon ?')) return;
 
- onSubmit() {
-  if (
-    this.pokemonTypeList.length < POKEMON_RULES.MIN_TYPES ||
-    this.pokemonTypeList.length > POKEMON_RULES.MAX_TYPES
-  ) {
-    console.error(
-      `Le nombre de types doit être entre ${POKEMON_RULES.MIN_TYPES} et ${POKEMON_RULES.MAX_TYPES}.`
-    );
-    return;
+    this.pokemonService.deletePokemon(this.pokemonId())
+      .then(() => {
+        console.log('Pokémon supprimé');
+        this.router.navigateByUrl('/pokemons');
+      })
+      .catch((err: any) => console.error('Erreur suppression', err));
   }
 
-  if (this.form.invalid) {
-    console.error('Le formulaire est invalide, merci de corriger les erreurs.');
-    return;
-  }
-
- 
-  const updatedPokemon: Pokemon = {
-    ...this.pokemon()!, 
-    ...this.form.value  
-  };
-
-  this.pokemonService.updatePokemon(updatedPokemon).subscribe({
-    next: () => {
-      console.log('Pokémon mis à jour avec succès !');
-      // Redirection vers la liste ou le détail du Pokémon
-      window.alert('Modification réussie !');
-      this.#router.navigateByUrl('/pokemons');
-      
-    },
-    error: err => {
-      console.error("Erreur lors de la mise à jour :", err);
+  onSubmit() {
+    if (
+      this.pokemonTypeList.length < POKEMON_RULES.MIN_TYPES ||
+      this.pokemonTypeList.length > POKEMON_RULES.MAX_TYPES
+    ) {
+      console.error(
+        `Le nombre de types doit être entre ${POKEMON_RULES.MIN_TYPES} et ${POKEMON_RULES.MAX_TYPES}.`
+      );
+      return;
     }
-  });
-}
 
+    if (this.form.invalid) {
+      console.error('Le formulaire est invalide, merci de corriger les erreurs.');
+      return;
+    }
+
+    const updatedPokemon: Pokemon = {
+      ...this.pokemon()!, 
+      ...this.form.value  
+    };
+
+    this.pokemonService.updatePokemon(updatedPokemon)
+      .then(() => {
+        console.log('Pokémon mis à jour avec succès !');
+        window.alert('Modification réussie !');
+        this.router.navigateByUrl('/pokemons');
+      })
+      .catch((err: any) => {
+        console.error("Erreur lors de la mise à jour :", err);
+      });
+  }
 }

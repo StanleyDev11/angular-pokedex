@@ -1,74 +1,84 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { catchError, Observable, tap, throwError } from 'rxjs';
-
-import { Pokemon, PokemonList } from './pokemon.model';
+import { Firestore, collectionData, collection, doc, docData, addDoc, updateDoc, deleteDoc, Timestamp } from '@angular/fire/firestore';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
+import { Pokemon } from './pokemon.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PokemonService {
-  private readonly POKEMON_API = 'http://localhost:3000/pokemons/';
+  [x: string]: any;
 
-  constructor(private http: HttpClient) {}
+  private pokemonCollection;
 
-  getPokemonList(): Observable<PokemonList> {
-    return this.http.get<PokemonList>(this.POKEMON_API);
+  constructor(private firestore: Firestore) {
+    // Retirer le type générique ici
+    this.pokemonCollection = collection(this.firestore, 'pokemons');
   }
 
-  getPokemonById(id: number): Observable<Pokemon> {
-    return this.http.get<Pokemon>(`${this.POKEMON_API}${id}`);
-  }
-
-  updatePokemon(pokemon: Pokemon): Observable<Pokemon> {
-    const url = `${this.POKEMON_API}${pokemon.id}`;
-    return this.http.put<Pokemon>(url, pokemon);
-  }
-
-  deletePokemon(id: number): Observable<void> {
-    const url = `${this.POKEMON_API}${id}`;
-    return this.http.delete<void>(url);
-  }
-
-  addPokemon(pokemon: Pokemon): Observable<Pokemon> {
-    return this.http.post<Pokemon>(this.POKEMON_API, pokemon).pipe(
-      tap((newPokemon: Pokemon) => console.log(`Nouveau Pokémon ajouté : ${newPokemon.name}`)),
-      catchError(this.handleError)
+  getPokemonList(): Observable<Pokemon[]> {
+    return collectionData(this.pokemonCollection, { idField: 'id' }).pipe(
+      // On caste explicitement en Pokemon[]
+      map((pokemons) => (pokemons as Pokemon[]).map(p => this.convertTimestampToDate(p))),
+      catchError(error => {
+        console.error('Erreur getPokemonList:', error);
+        return throwError(() => new Error('Erreur lors de la récupération des pokémons.'));
+      })
     );
   }
 
-  private handleError(error: HttpErrorResponse) {
-    console.error('Une erreur est survenue:', error);
-    // Tu peux adapter ce message d’erreur pour l’utilisateur
-    return throwError(() => new Error('Erreur lors de la requête. Veuillez réessayer plus tard.'));
+  getPokemonById(id: string): Observable<Pokemon | undefined> {
+    // Retirer le type générique ici
+    const pokemonDoc = doc(this.firestore, `pokemons/${id}`);
+    return docData(pokemonDoc, { idField: 'id' }).pipe(
+      map(pokemon => pokemon ? this.convertTimestampToDate(pokemon as Pokemon) : undefined),
+      catchError(error => {
+        console.error('Erreur getPokemonById:', error);
+        return throwError(() => new Error('Erreur lors de la récupération du pokémon.'));
+      })
+    );
   }
 
-  getPokemonTypeList(): string[] {
-    return [
-      'Plante',
-      'Feu',
-      'Eau',
-      'Insecte',
-      'Normal',
-      'Electrick',
-      'Poison',
-      'Fée',
-      'Vol',
-    ];
+  addPokemon(pokemon: Pokemon): Promise<void> {
+    return addDoc(this.pokemonCollection, pokemon)
+      .then(() => console.log('Pokémon ajouté'))
+      .catch(error => {
+        console.error('Erreur addPokemon:', error);
+        throw new Error('Erreur lors de l’ajout du pokémon.');
+      });
   }
 
-  getColor(type: string): string {
-    switch (type.toLowerCase()) {
-      case 'plante': return 'green';
-      case 'feu': return 'red';
-      case 'eau': return 'blue';
-      case 'insecte': return 'limegreen';
-      case 'normal': return 'gray';
-      case 'electrick': return 'gold';
-      case 'poison': return 'purple';
-      case 'fée': return 'pink';
-      case 'vol': return 'skyblue';
-      default: return 'lightgray';
+  updatePokemon(pokemon: Pokemon): Promise<void> {
+    if (!pokemon.id) {
+      return Promise.reject(new Error('Pokémon ID manquant pour mise à jour'));
     }
+    // Retirer le type générique ici
+    const pokemonDoc = doc(this.firestore, `pokemons/${pokemon.id}`);
+    return updateDoc(pokemonDoc, { ...pokemon })
+      .then(() => console.log('Pokémon mis à jour'))
+      .catch(error => {
+        console.error('Erreur updatePokemon:', error);
+        throw new Error('Erreur lors de la mise à jour du pokémon.');
+      });
+  }
+
+  deletePokemon(id: string): Promise<void> {
+    // Retirer le type générique ici
+    const pokemonDoc = doc(this.firestore, `pokemons/${id}`);
+    return deleteDoc(pokemonDoc)
+      .then(() => console.log('Pokémon supprimé'))
+      .catch(error => {
+        console.error('Erreur deletePokemon:', error);
+        throw new Error('Erreur lors de la suppression du pokémon.');
+      });
+  }
+
+  private convertTimestampToDate(pokemon: any): Pokemon {
+    return {
+      ...pokemon,
+      created: (pokemon.created instanceof Timestamp) ? pokemon.created.toDate() : pokemon.created,
+      update: (pokemon.update instanceof Timestamp) ? pokemon.update.toDate() : pokemon.update,
+    };
   }
 }

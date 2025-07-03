@@ -8,4 +8,4 @@ import { RouterModule, RouterOutlet } from '@angular/router';
   templateUrl: './app.html',
   styleUrls: ['./app.css']  // correction de styleUrl → styleUrls (avec un s)
 })
-export class App {}
+export class App  {}
